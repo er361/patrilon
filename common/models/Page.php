@@ -40,7 +40,7 @@ class Page extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['countryName', 'lat', 'lng', 'zoom', 'firstName', 'lastName', 'currency', 'nation', 'capital'], 'required'],
+            [['countryName', 'lat', 'lng', 'zoom', 'firstName', 'lastName', 'currency', 'nation', 'capital','Category_id'], 'required'],
             [['lat', 'lng'], 'number'],
             [['zoom', 'Category_id'], 'integer'],
             [['countryName', 'firstName', 'lastName', 'currency', 'nation', 'capital'], 'string', 'max' => 45],

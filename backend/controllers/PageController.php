@@ -7,10 +7,16 @@ use common\models\MediaData;
 use Yii;
 use common\models\Page;
 use common\models\PageSearch;
+use yii\base\ErrorException;
+use yii\base\UserException;
+use yii\console\Exception;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\ServerErrorHttpException;
+use yii\web\UploadedFile;
 
 /**
  * PageController implements the CRUD actions for Page model.
@@ -69,7 +75,25 @@ class PageController extends Controller
         $page = new Page();
         $mediaData = new MediaData();
 
-        if ($page->load(Yii::$app->request->post()) && $page->save()) {
+        if ($page->load(Yii::$app->request->post()) && $mediaData->load(Yii::$app->request->post())) {
+            
+            $mediaData->setInstances();
+            $mediaData->loadFiles();
+
+
+            if($page->save()){
+
+                $mediaData->Page_id = $page->id;
+                try{
+                    if($mediaData->save()){
+                        $mediaData->UploadFiles();
+                    } else {
+                        throw new BadRequestHttpException('Предоставлены не все данные для создания страницы',400);
+                    }
+                } catch (ErrorException $e){
+                    throw new ServerErrorHttpException('Ошибка на  сервере', 500,$e);
+                }
+            }
             return $this->redirect(['view', 'id' => $page->id]);
         } else {
             return $this->render('create', [
@@ -107,7 +131,6 @@ class PageController extends Controller
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
-
         return $this->redirect(['index']);
     }
 
